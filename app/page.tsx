@@ -94,16 +94,13 @@ export default function TaskManager() {
   // Deleting task
   const handleDeleteTask = async (id: string) => {
     try {
-      setLoading(true);
       await deleteTask(id);
       setTasks(await getTasks());
       toast({
         title: "Sucess!!",
         description: "Task deleted Successfully",
       });
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       toast({
         title: "Error!!",
         description: "Error deleting Task",
