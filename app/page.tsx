@@ -30,6 +30,7 @@ export interface SingleTask {
 
 export default function TaskManager() {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskObject, setTaskObject] = useState<SingleTask>({
     title: "",
@@ -56,9 +57,10 @@ export default function TaskManager() {
           title: "Error!!",
           description: "Due date is in the past!",
         });
-        return
+        return;
       }
 
+      setLoading(true);
       if (editingTask) {
         // editing
         await editTask(editingTask._id, taskObject);
@@ -78,8 +80,10 @@ export default function TaskManager() {
           description: "Task added Successfully",
         });
       }
+      setLoading(false);
       setTaskObject({ title: "", description: "", dueDate: null });
     } catch (error) {
+      setLoading(false);
       toast({
         title: "Error!!",
         description: "Error adding or updating Task",
@@ -90,13 +94,16 @@ export default function TaskManager() {
   // Deleting task
   const handleDeleteTask = async (id: string) => {
     try {
+      setLoading(true);
       await deleteTask(id);
       setTasks(await getTasks());
       toast({
         title: "Sucess!!",
         description: "Task deleted Successfully",
       });
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       toast({
         title: "Error!!",
         description: "Error deleting Task",
@@ -150,8 +157,18 @@ export default function TaskManager() {
           placeholder="Enter description"
         />
       </div>
-      <Button className="w-[100px] mx-auto block" onClick={handleAddTask}>
-        {editingTask ? "Update" : "Add"}
+      <Button
+        disabled={loading}
+        className="w-[100px] mx-auto block"
+        onClick={handleAddTask}
+      >
+        {loading
+          ? editingTask
+            ? "Updating..."
+            : "Adding..."
+          : editingTask
+          ? "Update"
+          : "Add"}{" "}
       </Button>
       <div className="space-y-3 mt-6">
         {tasks.map((taskObject) => (
@@ -201,6 +218,7 @@ export default function TaskManager() {
                 <Edit className="text-blue-500" />
               </Button>
               <Button
+                disabled={loading}
                 variant="destructive"
                 size="icon"
                 onClick={() => handleDeleteTask(taskObject._id)}
